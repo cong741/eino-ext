@@ -29,6 +29,7 @@ import (
 	"github.com/cloudwego/eino/schema"
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/meguminnnnnnnnn/go-openai"
+	"golang.org/x/time/rate"
 )
 
 type ChatCompletionResponseFormatType string
@@ -73,7 +74,6 @@ type Config struct {
 	// ByAzure indicates whether to use Azure OpenAI Service
 	// Required for Azure
 	ByAzure bool `json:"by_azure"`
-
 
 	// AzureModelMapperFunc is used to map the model name to the deployment name for Azure OpenAI Service.
 	// This is useful when the model name is different from the deployment name.
@@ -155,6 +155,10 @@ type Config struct {
 	// ReasoningEffort will override the default reasoning level of "medium"
 	// Optional. Useful for fine tuning response latency vs. accuracy
 	ReasoningEffort ReasoningEffortLevel
+
+	// RateLimiter is the rate limiter to use for the model
+	// Optional. Default: no rate limiter
+	RateLimiter *rate.Limiter `json:"rate_limiter,omitempty"`
 }
 
 type Client struct {
@@ -191,6 +195,10 @@ func NewClient(ctx context.Context, config *Config) (*Client, error) {
 	clientConf.HTTPClient = config.HTTPClient
 	if clientConf.HTTPClient == nil {
 		clientConf.HTTPClient = http.DefaultClient
+	}
+
+	if config.RateLimiter != nil {
+		clientConf.RateLimiter = config.RateLimiter
 	}
 
 	return &Client{

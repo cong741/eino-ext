@@ -25,6 +25,7 @@ import (
 	"github.com/cloudwego/eino/components"
 	"github.com/cloudwego/eino/components/model"
 	"github.com/cloudwego/eino/schema"
+	"golang.org/x/time/rate"
 
 	"github.com/cloudwego/eino-ext/libs/acl/openai"
 )
@@ -125,6 +126,10 @@ type ChatModelConfig struct {
 	// ExtraFields will override any existing fields with the same key.
 	// Optional. Useful for experimental features not yet officially supported.
 	ExtraFields map[string]any `json:"extra_fields,omitempty"`
+
+	// RateLimiter is the rate limiter to use for the model
+	// Optional. Default: no rate limiter
+	RateLimiter *rate.Limiter `json:"rate_limiter,omitempty"`
 }
 
 type ChatModel struct {
